@@ -2,7 +2,9 @@ import request from '@/utils/request'
 import resource from './resource'
 
 export default function (name,params,other={}){
+    
     if(name.slice(0,4) === 'http'){
+        //`baseURL` 将自动加在 `url` 前面，除非 `url` 是一个绝对 URL。
         let arg={
             url:name,
             params,
