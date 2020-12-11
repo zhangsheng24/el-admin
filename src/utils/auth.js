@@ -1,18 +1,25 @@
 import Cookies from 'js-cookie'
-import Config from '@/settings'
+import cfg from '@/config'
 
-const TokenKey = Config.TokenKey
+const TokenKey = cfg.TokenKey
 
-export function getToken() {
-  return Cookies.get(TokenKey)
+const getToken = function () {
+    return Cookies.get(TokenKey)
 }
 
-export function setToken(token, rememberMe) {
-  if (rememberMe) {
-    return Cookies.set(TokenKey, token, { expires: Config.tokenCookieExpires })
-  } else return Cookies.set(TokenKey, token)
+const setToken = function (token, rememberMe) {
+    //如果选择记住我，那么就设置一个cookie有效时间，如果不设置，当关闭浏览器，存到cookie的数据全部清除
+    if (rememberMe) {
+        return Cookies.set(TokenKey, token, { expires: cfg.tokenCookieExpires })
+    } else return Cookies.set(TokenKey, token)
 }
 
-export function removeToken() {
-  return Cookies.remove(TokenKey)
+const removeToken = function () {
+    return Cookies.remove(TokenKey)
+}
+
+export {
+    getToken,
+    setToken,
+    removeToken
 }
