@@ -4,7 +4,8 @@
       <!-- <div class="b">
         <svg-icon icon-class="user1" />
       </div> -->
-      <el-button type="primary">主要按钮</el-button>
+      <!-- <el-button type="primary">主要按钮</el-button> -->
+      <router-view/>
   </div>
 </template>
 
