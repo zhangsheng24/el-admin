@@ -9,7 +9,7 @@ let config = {
     /**
    * @description token key
    */
-    TokenKey: 'EL-ADMIN-TOEKN',
+    // TokenKey: 'EL-ADMIN-TOEKN',
     /**
    * @description 记住密码状态下的token在Cookie中存储的天数，默认1天
    */
