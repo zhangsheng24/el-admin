@@ -33,7 +33,7 @@
         <el-input
           v-model="loginForm.code"
           style="width: 63%"
-          type="password"
+          type="text"
           placeholder="验证码"
         >
           <svg-icon
@@ -54,9 +54,11 @@
           style="width: 100%"
           size="medium"
           type="primary"
+          :loading='loading'
           @click.native.prevent="handleLogin"
         >
-          <span>登 录</span>
+          <span v-if="!loading">登 录</span>
+          <span v-else>登 录 中...</span>
         </el-button>
       </el-form-item>
     </el-form>
@@ -65,13 +67,16 @@
 <script>
 import Background from "@/assets/images/background.jpg";
 import api from "@/api";
-import { encrypt } from "@/utils/rsaEncrypt.js";
+import { encrypt, decrypt } from "@/utils/rsaEncrypt";
+import { CgetItem, CsetItem, CreItem } from "@/utils/storage";
+import config from "@/config";
+
 export default {
   data() {
     return {
       loginForm: {
-        username: "admin",
-        password: "123456",
+        username: "",
+        password: "",
         code: "",
         uuid: "",
         rememberMe: false,
@@ -89,19 +94,24 @@ export default {
       },
       codeUrl: "",
       Background: Background,
+      loading:false,
     };
   },
   created() {
-    //获取验证码
+    // 获取验证码
     this.getCode();
+    // 用户通过某个方式跳转到登录页面，先去cookie中获取用户名和密码等，是否能获取到取决于是否点击记住我
+    this.getCookieInfo();
   },
   methods: {
+    // 获取验证码
     getCode() {
       api("login.getCode").then((res) => {
         this.codeUrl = res.img;
         this.loginForm.uuid = res.uuid;
       });
     },
+    // 点击登录
     handleLogin() {
       this.$refs.loginForm.validate((valid) => {
         const user = {
@@ -111,13 +121,56 @@ export default {
           code: this.loginForm.code,
           uuid: this.loginForm.uuid,
         };
+        
         if (valid) {
-          this.$store.dispatch("Login", user)
+            this.loading = true
+          // 记住我
+          if (user.rememberMe) {
+            CsetItem("username", user.username, {
+              expires: config.passCookieExpires,
+            });
+            CsetItem("password", user.password, {
+              expires: config.passCookieExpires,
+            });
+            CsetItem("rememberMe", user.rememberMe, {
+              expires: config.passCookieExpires,
+            });
+          } else {
+            CreItem("username");
+            CreItem("password");
+            CreItem("rememberMe");
+          }
+          this.$store
+            .dispatch("Login", user)
+            .then(() => {
+                this.loading = false
+              console.log("登录成功");
+            })
+            .catch((err) => {
+                this.loading = false
+              console.log("登录失败", err);
+            });
         } else {
           console.log("error submit!!");
           return false;
         }
       });
+    },
+    // 获取cookie保存的用户登录信息
+    getCookieInfo() {
+      let username = CgetItem("username");
+      let password = CgetItem("password"); // 保存cookie里面的加密后的密码
+      let rememberMe = CgetItem("rememberMe");
+      username = username === undefined ? this.loginForm.username : username;
+      password = password === undefined ? this.loginForm.password : decrypt(password);
+      rememberMe = rememberMe === undefined ? this.loginForm.rememberMe : rememberMe;
+      this.loginForm = {
+        username,
+        password,
+        code: "",
+        rememberMe
+      };
+      console.log(this.loginForm)
     },
   },
 };
