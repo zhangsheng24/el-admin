@@ -1,6 +1,7 @@
 import axios from 'axios'
 //在main.js中引入了vant，所以在任何组件中都可以使用，但是网络请求跟main.js没得任何关系，要用就得引入，可以按需引入
 import cfg from '@/config'
+import {CgetItem} from '@/utils/storage'
 
 
 // axios使用post发送数据时，默认是直接把json放到请求体中提交到后端，也就是说Content-type是application/json;charset=utf-8
@@ -19,7 +20,9 @@ axios.defaults.timeout = 20000
 axios.defaults.wiCredentials = true
 //https://el-admin.xin/api/menus/build
 axios.interceptors.request.use(config => {
-  
+    if(CgetItem('token')){
+        config.headers['Authorization']=CgetItem('token')
+    }
     return config
 })
 

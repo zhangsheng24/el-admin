@@ -3,6 +3,7 @@ import App from './App.vue'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 
+
 // global css
 import './assets/styles/index.scss'
 
@@ -12,6 +13,7 @@ import store from './store'
 Vue.use(ElementUI);
 
 import './assets/icons/index'
+import './permission'
 
 
 Vue.config.productionTip = false
