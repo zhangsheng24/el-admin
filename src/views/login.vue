@@ -95,11 +95,7 @@ export default {
       codeUrl: "",
       Background: Background,
       loading:false,
-<<<<<<< HEAD
-      redirect:''
-=======
       redirect:undefined
->>>>>>> 15d072f09009c92cb6952034f1a5b784b5f7f54e
     };
   },
   watch:{
@@ -115,14 +111,6 @@ export default {
     this.getCode();
     // 用户通过某个方式跳转到登录页面，先去cookie中获取用户名和密码等，是否能获取到取决于是否点击记住我
     this.getCookieInfo();
-  },
-  watch:{
-    $route:{
-      handler:function(route){
-        this.redirect=route.query && route.query.redirect
-      },
-      immediate:true
-    }
   },
   methods: {
     // 获取验证码
@@ -164,14 +152,8 @@ export default {
           this.$store
             .dispatch("Login", user)
             .then(() => {
-<<<<<<< HEAD
-              this.loading = false
-              console.log(this.redirect)
-              this.$router.push({path:this.redirect || '/'})
-=======
                 this.loading = false
                 this.$router.push({path:this.redirect || '/'})
->>>>>>> 15d072f09009c92cb6952034f1a5b784b5f7f54e
             })
             .catch((err) => {
                 this.loading = false
