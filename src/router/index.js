@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import routes from './resource'
+import {constantRouterMap} from './resource'
 Vue.use(VueRouter)
 
 const router=new VueRouter({
-    routes
+    routes:constantRouterMap
 })
 
 export default router
