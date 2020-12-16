@@ -43,7 +43,7 @@
           />
         </el-input>
         <div class="login-code">
-          <img :src="codeUrl" />
+          <img :src="codeUrl" @click="getCode" />
         </div>
       </el-form-item>
       <el-checkbox v-model="loginForm.rememberMe" style="margin: 0 0 25px 0">
@@ -101,6 +101,11 @@ export default {
   watch:{
     $route:{
       handle:function(route){
+        // 如果你要跳转到user这个页面，但是此时没有token,就跳转到登录页，并且给登录页添加redirect参数，重新登录就会跳转到user，而不是根路径
+        /**
+         * 只要to也就是要访问的地址不在白名单当中，我们就让他重新跳转到登录页，并且收集此时地址的path
+            next({ path: `/login?redirect=${to.path}` })
+         */
         this.redirect=route.query && route.query.redirect
       },
       immediate:true
@@ -157,7 +162,7 @@ export default {
             })
             .catch((err) => {
                 this.loading = false
-              console.log("登录失败", err);
+                this.getCode()
             });
         } else {
           console.log("error submit!!");
