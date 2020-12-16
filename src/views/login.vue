@@ -95,8 +95,20 @@ export default {
       codeUrl: "",
       Background: Background,
       loading:false,
+<<<<<<< HEAD
       redirect:''
+=======
+      redirect:undefined
+>>>>>>> 15d072f09009c92cb6952034f1a5b784b5f7f54e
     };
+  },
+  watch:{
+    $route:{
+      handle:function(route){
+        this.redirect=route.query && route.query.redirect
+      },
+      immediate:true
+    }
   },
   created() {
     // 获取验证码
@@ -152,9 +164,14 @@ export default {
           this.$store
             .dispatch("Login", user)
             .then(() => {
+<<<<<<< HEAD
               this.loading = false
               console.log(this.redirect)
               this.$router.push({path:this.redirect || '/'})
+=======
+                this.loading = false
+                this.$router.push({path:this.redirect || '/'})
+>>>>>>> 15d072f09009c92cb6952034f1a5b784b5f7f54e
             })
             .catch((err) => {
                 this.loading = false

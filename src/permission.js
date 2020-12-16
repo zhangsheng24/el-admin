@@ -1,7 +1,8 @@
 import router from './router/index'
 import {CgetItem} from '@/utils/storage'
 import store from './store'
-
+import api from '@/api'
+import {filterAsyncRouter} from '@/store/modules/premission'
 
 console.log(store.getters.roles)
 
@@ -15,16 +16,21 @@ router.beforeEach((to,from,next)=>{
      * to.fullPath="/login?a=1"
      * to.query={a: "1"}
      */
-    console.log(from)
-    console.log(to)
     // token存在且未过期的情况下
     if(CgetItem('token')){
         // 已登录，token未过期，如果用户在地址栏输入登录地址，则让它跳转到首页
         if(to.path === '/login'){
             next({path:'/'})
         }else{// 地址栏不是登录/login
+            // 执行这里：当刷新网页的时候，vuex的数据都会初始化，所以roles会清空
             if(store.getters.roles.length === 0){
-                store.dispatch('GetInfo')
+                store.dispatch('GetInfo').then(()=>{
+                    loadMenus(next,to)
+                })
+            }else if(store.getters.loadMenus){//当在login页面点击登录的时候loadMenus会为true执行这里
+                loadMenus(next,to)
+            }else{
+                next()
             }
 
         }
@@ -39,6 +45,17 @@ router.beforeEach((to,from,next)=>{
         }
     }
 })
+
+export const loadMenus=(next,to)=>{
+    next()
+    api('system.menus.buildMenus').then(res=>{
+        console.log(res)
+        const asyncRouter=filterAsyncRouter(res)
+    })
+}
+
+
+
 router.afterEach(()=>{
 
 })
