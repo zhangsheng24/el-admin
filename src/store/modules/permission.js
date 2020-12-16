@@ -1,7 +1,7 @@
-import constantRouterMap from '@/router/resource'
+import {constantRouterMap} from '@/router/resource'
 import Layout from '@/layout/index'
 
-const premission={
+const permission={
     state:{
         routers:constantRouterMap,
         addRouters:[]
@@ -13,15 +13,14 @@ const premission={
         }
     },
     actions:{
-        GenerateRoutee({commit},asyncRouter){
+        GenerateRoutes({commit},asyncRouter){
             commit('SET_ROUTERS',asyncRouter)
         }
     }
 }
 
-
 export const filterAsyncRouter = (routers) =>{
-    // 便利后台传来的路由字符串，转换成组件对象
+    // 遍历后台传来的路由字符串，转换成组件对象
     return routers.filter(router=>{
         if(router.component){
             if(router.component === 'Layout'){
@@ -44,4 +43,4 @@ export const loadView=(view)=>{
 }
 
 
-export default premission
+export default permission
