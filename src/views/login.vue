@@ -95,7 +95,16 @@ export default {
       codeUrl: "",
       Background: Background,
       loading:false,
+      redirect:undefined
     };
+  },
+  watch:{
+    $route:{
+      handle:function(route){
+        this.redirect=route.query && route.query.redirect
+      },
+      immediate:true
+    }
   },
   created() {
     // 获取验证码
@@ -144,7 +153,7 @@ export default {
             .dispatch("Login", user)
             .then(() => {
                 this.loading = false
-              console.log("登录成功");
+                this.$router.push({path:this.redirect || '/'})
             })
             .catch((err) => {
                 this.loading = false
