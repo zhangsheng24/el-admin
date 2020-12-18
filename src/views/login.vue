@@ -100,7 +100,7 @@ export default {
   },
   watch:{
     $route:{
-      handle:function(route){
+      handler:function(route){
         // 如果你要跳转到user这个页面，但是此时没有token,就跳转到登录页，并且给登录页添加redirect参数，重新登录就会跳转到user，而不是根路径
         /**
          * 只要to也就是要访问的地址不在白名单当中，我们就让他重新跳转到登录页，并且收集此时地址的path

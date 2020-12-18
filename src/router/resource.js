@@ -23,7 +23,8 @@ export const constantRouterMap=[
                 component:Home,
                 name:'Home',
                 meta:{
-                    title:'首页'
+                    title:'首页',
+                    icon: 'index'
                 }
             }
         ]
