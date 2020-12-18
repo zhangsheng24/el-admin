@@ -1,23 +1,36 @@
 <template>
-  <div class="app-wrapper">
+  <div :class="classObj" class="app-wrapper">
     <sidebar class="sidebar-container" />
-    <router-view />
+     <div class="main-container">
+        <div>
+          <navbar />
+        </div>
+        <app-main />
+      </div>
   </div>
 </template>
 <script>
-import { Sidebar } from "./components";
+import { Sidebar, Navbar, AppMain } from "./components";
+import {mapState} from 'vuex'
 export default {
   data() {
     return {};
   },
+  computed:{
+    ...mapState({
+      sidebar: state => state.app.sidebar,
+    }),
+    classObj(){
+      return {
+        hideSidebar:!this.sidebar.opened
+      }
+    }
+  },
   components: {
     Sidebar,
-  },
-  methods: {
-    a() {
-      console.log(12);
-    },
-  },
+    Navbar,
+    AppMain
+  }
 };
 </script>
 <style lang="scss" scoped>

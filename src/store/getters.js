@@ -2,6 +2,7 @@
 const getters={
     roles:state => state.user.roles,
     loadMenus:state => state.user.loadMenus,
-    permission_routers:state => state.permission.routers
+    permission_routers:state => state.permission.routers,
+    sidebar:state => state.app.sidebar
 }
 export default getters
