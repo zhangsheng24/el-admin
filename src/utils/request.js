@@ -1,7 +1,10 @@
 import axios from 'axios'
 //在main.js中引入了vant，所以在任何组件中都可以使用，但是网络请求跟main.js没得任何关系，要用就得引入，可以按需引入
 import cfg from '@/config'
-import {CgetItem} from '@/utils/storage'
+import { CgetItem, CsetItem } from '@/utils/storage'
+import { Notification } from 'element-ui'
+import store from '@/store'
+import router from '../router'
 
 
 // axios使用post发送数据时，默认是直接把json放到请求体中提交到后端，也就是说Content-type是application/json;charset=utf-8
@@ -19,31 +22,78 @@ axios.defaults.timeout = 20000
 //也可以简单的理解为，当前请求为跨域类型时是否在请求中协带cookie。
 axios.defaults.wiCredentials = true
 //https://el-admin.xin/api/menus/build
-axios.interceptors.request.use(config => {
-    if(CgetItem('token')){
-        config.headers['Authorization']=CgetItem('token')
+axios.interceptors.request.use(
+    config => {
+        if (CgetItem('token')) {
+            config.headers['Authorization'] = CgetItem('token')
+        }
+        return config
+    },
+    err => {
+        Promise.reject(err)
     }
-    return config
-})
+)
 
-axios.interceptors.response.use(res => {
-    if (res.data) {
-        return res.data;
-    } 
-}, err => {
-    return Promise.reject(err)
-})
+axios.interceptors.response.use(
+    res => {
+        if (res.data) {
+            return res.data;
+        }
+    },
+    err => {
+        console.log(err.response)
+        let code = 0
+        try {
+            code = err.response.data.status
+        } catch (e) {
+            if (err.toString().indexOf('Error: timeout') !== -1) {
+                Notification.error({
+                    title: '网络请求超时',
+                    duration: 5000
+                })
+                return Promise.reject(err)
+            }
+        }
+        console.log(code)
+        if (code) {
+            if (code === 401) {
+                store.dispatch('LogOut').then(() => {
+                    // 用户登录界面提示
+                    CsetItem('point', 401)
+                    location.reload()
+                })
+            }else if(code === 403){// 没有权限
+                router.push({path:'/401'})
+            }else{
+                const errorMsg=err.response.data.message
+                if(errorMsg !== undefined){
+                    Notification.error({
+                        title:errorMsg,
+                        duration:5000
+                    })
+                }
+            }
+        }else{
+            Notification.error({
+                title:'接口请求失败',
+                duration:5000
+            })
+        }
 
-export default function(options){
-    let params={
-        method:options.method,
-        url:options.url,
-        data:options.params,
+        return Promise.reject(err)
+    }
+)
+
+export default function (options) {
+    let params = {
+        method: options.method,
+        url: options.url,
+        data: options.params,
         ...options.other
     }
-    if(params.method.toLowerCase() === 'get'){
-        params.params=params.data,
-        delete params.data
+    if (params.method.toLowerCase() === 'get') {
+        params.params = params.data,
+            delete params.data
     }
     return axios(params)
 }
