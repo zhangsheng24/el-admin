@@ -15,6 +15,15 @@ let config = {
    */
     tokenCookieExpires: 1,
     title: 'EL-ADMIN',
+    /**
+   * @description 是否显示logo
+   */
+    sidebarLogo: true,
+     /**
+   * @description 是否显示 tagsView
+   */
+    tagsView: true,
+
 }
 
 
