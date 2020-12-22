@@ -67,7 +67,7 @@ export const loadMenus = (next, to) => {
         // 所以在permission.js模块中，actions里面GenerateRoutes方法并没有返回一个promise，而这里可以用then的原因
         // 当然我们也可以在asyncRouter里面返回一个promise
         store.dispatch('GenerateRoutes', asyncRouter).then(() => { 
-            console.log(store.getters.permission_routers)
+            // console.log(store.getters.permission_routers)
             router.addRoutes(asyncRouter) // 动态添加可访问路由表，路由表里面就是所有的路由
             next({ ...to, replace: true })
         })

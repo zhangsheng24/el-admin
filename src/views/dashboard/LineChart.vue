@@ -3,8 +3,10 @@
 </template>
 <script>
 import echarts from "echarts";
-// require('echarts/theme/macarons') // echarts theme
+require('echarts/theme/macarons') // echarts theme
+import resize from '@/mixins/resize'
 export default {
+    mixins:[resize],
   props: {
     className: {
       type: String,
@@ -33,7 +35,7 @@ export default {
   },
   data() {
     return {
-      chart: null,
+      chart: null
     };
   },
   mounted() {
@@ -42,6 +44,7 @@ export default {
       this.initChart();
     });
   },
+  
   methods: {
     initChart() {
       // vm.$elVue 实例使用的根 DOM 元素
@@ -54,7 +57,7 @@ export default {
           data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
           boundaryGap: false,
           axisTick: {
-            show: false
+            show: true
           }
         },
         grid: {
