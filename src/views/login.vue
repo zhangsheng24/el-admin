@@ -177,7 +177,9 @@ export default {
       let rememberMe = CgetItem("rememberMe");
       username = username === undefined ? this.loginForm.username : username;
       password = password === undefined ? this.loginForm.password : decrypt(password);//解密
-      rememberMe = rememberMe === undefined ? this.loginForm.rememberMe : rememberMe;
+      // console.log(rememberMe)cookie存的时候会自动吧true变成'true'，取的时候get拿到的也是'true'，需要转一下
+      //如果存的是json字符串，就JSON.parse()
+      rememberMe = rememberMe === undefined ? this.loginForm.rememberMe : Boolean(rememberMe);
       this.loginForm = {
         username,
         password,
