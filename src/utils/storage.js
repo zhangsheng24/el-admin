@@ -51,7 +51,7 @@ function SreItem(key) {
 
 
 const CgetItem = function (key) {
-    return Cookies.getJSON(name + key)
+    return Cookies.get(name + key)
 }
 
 const CsetItem = function (key, value,other = {}) {
