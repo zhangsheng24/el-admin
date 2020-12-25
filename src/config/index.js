@@ -23,14 +23,18 @@ let config = {
    * @description 是否显示 tagsView
    */
     tagsView: true,
+    /**
+   * @description 固定头部
+   */
+    fixedHeader: true,
 
 }
 
 
 if (config.type === 'development') {
-    config.port = ''
+    config.port = ':8000'
     // config.baseUrl = '/api'
-    config.host = 'https://el-admin.xin'
+    config.host = 'http://localhost'
 } else if (config.type === 'production') {
     config.port = ''
     // config.baseUrl = '/api'
