@@ -4,6 +4,7 @@
       <!--左侧插槽-->
       <slot name="left" />
       <el-button
+        v-permission="['user:add']"
         class="filter-item"
         size="mini"
         type="primary"

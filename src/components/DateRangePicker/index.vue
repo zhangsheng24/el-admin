@@ -23,6 +23,10 @@ export default {
       type: String,
       default: "daterange",
     },
+    valueFormat: {
+      type: String,
+      default: 'yyyy-MM-dd HH:mm:ss'
+    },
   },
 };
 </script>

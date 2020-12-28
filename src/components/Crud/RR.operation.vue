@@ -5,6 +5,7 @@
       size="mini"
       type="success"
       icon="el-icon-search"
+      @click="crud.toQuery"
       >搜索</el-button
     >
     <el-button
@@ -12,13 +13,17 @@
       size="mini"
       type="warning"
       icon="el-icon-refresh-left"
+      @click="crud.resetQuery"
       >重置</el-button
     >
   </span>
 </template>
 <script>
-// import {crud} from '@/component/Crud/crud'
+import {crud} from './crud'
 export default {
-    // mixins: [crud()],
+    mixins: [crud()],
+    mounted(){
+      console.log(this.crud)
+    }
 };
 </script>

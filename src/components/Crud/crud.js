@@ -9,6 +9,8 @@ import api from '@/api'
 function CRUD(options) {
     const defaultOptions = {
         tag: 'default',
+        // id字段名
+        idField: 'id',
         // 标题
         title: '',
         // 请求数据的url
@@ -17,12 +19,16 @@ function CRUD(options) {
         data: [],
         // 待查询的对象
         query: {},
+        // 等待时间
+        time: 50,
         // 在主页准备
         queryOnPresenterCreated: true,
 
     }
     options = mergeOptions(defaultOptions, options)
+    console.log(options)
     const data = {
+        // 这儿的目的是为了将传给CRUD的数据覆盖掉defaultOptions默认里面的数据，因为我们有可能改变某些属性值
         ...options,
         page: {
             // 页码
@@ -30,43 +36,99 @@ function CRUD(options) {
             // 每页数据条数
             size: 10,
             // 总数据条数
-            total: 0
+            total: 0,
         },
+        // 整体loading
+        loading: false,
     }
     const methods = {
         // 搜索
         toQuery() {
-            // crud.page.page = 1
+            crud.page.page = 1
             crud.refresh()
         },
         // 刷新
         refresh() {
-            if (!callVmHook(crud, CRUD.HOOK.beforeRefresh)) {
-                return
-            }
+            // if (!callVmHook(crud, CRUD.HOOK.beforeRefresh)) {
+            //     return
+            // }
             return new Promise((resolve, reject) => {
+                crud.loading = true
                 //请求数据
+                console.log(crud.getQueryParams())
                 api(crud.url, crud.getQueryParams()).then(res => {
+                    const table = crud.getTable()
+                    console.log(table, 'table')
                     crud.page.total = res.totalElements
+                    // 表格数组数据，如果后端返回的字段不是content，请自行修改
                     crud.data = res.content
+                    // 重置数据状态
+                    // crud.resetDataStatus()
+                    // time毫秒后显示表格
+                    setTimeout(() => {
+                        crud.loading = false
+                        callVmHook(crud, CRUD.HOOK.afterRefresh)
+                    }, crud.time)
                     // resolve(res)
                 })
             })
         },
         //获取查询参数
         getQueryParams() {
+            // 清除query参数无值的情况
+            Object.keys(crud.query).length !== 0 && Object.keys(crud.query).forEach(item => {
+                if (crud.query[item] === null || crud.query[item] === '') crud.query[item] = undefined
+            })
+            console.log(crud.query)
+
             return {
-                page: 0,
-                size: 10,
-                sort: 'id,desc'
+                page: crud.page.page - 1,
+                size: crud.page.size,
+                sort: crud.sort,
+                ...crud.query
             }
         },
         getTable() {
-            return crud.findVM('presenter').$refs.table
+            return this.findVM('presenter').$refs.table
         },
         findVM(type) {
             return crud.vms.find(vm => vm && vm.type === type).vm
         },
+        /**
+         * 重置查询参数
+         * @param {Boolean} toQuery 重置后进行查询操作
+         */
+        resetQuery(toQuery=true){
+            //defaultQuery拿到的是一个空对象
+            const defaultQuery = JSON.parse(JSON.stringify(crud.defaultQuery)) 
+            //获取当前的query
+            const query=crud.query
+            console.log(query)
+            //让query里面的每一个查询参数的值都是空对象中对应key的值也就是undefined
+            Object.keys(query).forEach(key=>{
+                query[key]=defaultQuery[key]
+            })
+            // // 重置参数
+            // this.query={}
+            if(toQuery){
+                crud.toQuery()
+            }
+        },
+
+
+
+        /**
+        * 重置数据状态
+        */
+        resetDataStatus() {
+            const dataStatus = {}
+            function resetStatus(datas) {
+                console.log(datas)
+            }
+            resetStatus(crud.data)
+            crud.dataStatus = dataStatus
+        }
+
 
     }
     const crud = Object.assign({}, data)
@@ -102,6 +164,7 @@ function CRUD(options) {
                 this.vms[index] = vmObj
                 return
             }
+            // 返回两个指定的数中带有较大的值的那个数
             this.vms.length = Math.max(this.vms.length, index)
             this.vms.splice(index, 1, vmObj)
 
@@ -128,10 +191,33 @@ function CRUD(options) {
 
 }
 
-
+// 记录crud每个操作的事件钩子状态
 function callVmHook(crud, hook) {
     console.log(crud, hook)
+    const tagHook = crud.tag ? hook + '$' + crud.tag : null
+    console.log(tagHook)
     let ret = true
+    const nargs = [crud]
+    // for (let i = 2; i < arguments.length; ++i) {
+    //     console.log(i)
+    //     nargs.push(arguments[i])
+    // }
+    // console.log(nargs)
+    const vmSet = new Set()
+    crud.vms.forEach(vm => vm && vmSet.add(vm.vm))
+    console.log(crud.vms)
+    console.log(vmSet)
+    vmSet.forEach(vm => {
+        if (vm[hook]) {
+            console.log(vm[hook])
+            ret = vm[hook].apply(vm, nargs) !== false && ret
+        }
+        if (tagHook && vm[tagHook]) {
+            console.log(vm[tagHook])
+            ret = vm[tagHook].apply(vm, nargs) !== false && ret
+        }
+    })
+    console.log(ret)
     return ret
 }
 
@@ -154,15 +240,16 @@ function mergeOptions(src, opts) {
 function presenter(crud) {
     return {
         data() {
+            // 在data中返回crud，是为了将crud与当前实例关联，组件观测crud相关变化。因为采用的混入mixin
             return {
                 crud: this.crud
             }
         },
         beforeCreate() {
             this.$crud = this.$crud || {}
-            //#options用于当前 Vue 实例的初始化选项。需要在选项中包含自定义 property 时会有用处,在这个对象中可以拿到我们自定义的某个属性
+            //$options用于当前 Vue 实例的初始化选项。需要在选项中包含自定义 property 时会有用处,在这个对象中可以拿到我们自定义的某个属性
             let cruds = this.$options.cruds instanceof Function ? this.$options.cruds() : crud
-            // console.log(cruds)是CRUD函数的返回值
+            // console.log(cruds)是CRUD函数的返回值,返回值里面包含了很多的属性和方法供我们使用
             if (!(cruds instanceof Array)) {
                 cruds = [cruds]
             }
@@ -170,7 +257,7 @@ function presenter(crud) {
                 if (this.$crud[ele.tag]) {
                     console.error('[CRUD error]: ' + 'crud with tag [' + ele.tag + ' is already exist')
                 }
-                //给实例对象里面
+                //给实例对象里面，目的是被子组件找到这个crud对象
                 this.$crud[ele.tag] = ele
                 ele.registerVM('presenter', this, 0)
             })
@@ -179,7 +266,6 @@ function presenter(crud) {
         },
         created() {
             for (let k in this.$crud) {
-                console.log(k)
                 if (this.$crud[k].queryOnPresenterCreated) {
                     this.$crud[k].toQuery()
                 }
@@ -193,6 +279,44 @@ function presenter(crud) {
         },
     }
 }
+/**
+ * 头部
+ */
+function header() {
+    return {
+        data() {
+            return {
+                crud: this.crud,
+                query: this.crud.query
+            }
+        },
+        beforeCreate() {
+            this.crud = lookupCrud(this)
+            this.crud.registerVM('header', this, 1)
+        },
+        destroyed() {
+            this.crud.unregisterVM('header', this)
+        }
+    }
+}
+
+
+/**
+ * 查找crud
+ * @param {*} vm
+ * @param {string} tag
+ */
+function lookupCrud(vm, tag) {
+    tag = tag || vm.$attrs['crud-tag'] || 'default'
+    // function lookupCrud(vm, tag) {
+    if (vm.$crud) {
+        const ret = vm.$crud[tag]
+        if (ret) {
+            return ret
+        }
+    }
+    return vm.$parent ? lookupCrud(vm.$parent, tag) : undefined
+}
 function crud(options = {}) {
     const defaultOptions = {
         type: undefined
@@ -205,6 +329,7 @@ function crud(options = {}) {
             }
         },
         beforeCreate() {
+            this.crud = lookupCrud(this)
             this.crud.registerVM(options.type, this)
         },
     }
@@ -214,12 +339,14 @@ function crud(options = {}) {
  */
 CRUD.HOOK = {
     /**刷新 - 之前 */
-    beforeRefresh: 'beforeCrudRefresh'
+    beforeRefresh: 'beforeCrudRefresh',
+    afterRefresh: 'afterCrudRefresh'
 }
 
 export default CRUD
 
 export {
     crud,
-    presenter
+    presenter,
+    header
 }

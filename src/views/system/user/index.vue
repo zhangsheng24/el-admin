@@ -39,17 +39,18 @@
             <!-- 搜索 -->
             <el-input
               clearable
+              v-model="query.blurry"
               size="small"
               placeholder="输入名称或者邮箱搜索"
               style="width: 200px"
               class="filter-item"
             />
-            <date-range-picker />
+            <date-range-picker v-model="query.createTime" />
             <rrOperation />
           </div>
           <crudOperation />
         </div>
-        <el-table ref="table" :data="crud.data" style="width: 100%">
+        <el-table ref="table" v-loading='crud.loading' :data="crud.data" style="width: 100%">
           <el-table-column prop="username" label="用户名"> </el-table-column>
           <el-table-column prop="nickName" label="昵称"> </el-table-column>
           <el-table-column prop="gender" label="性别"> </el-table-column>
@@ -61,11 +62,6 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-table-column prop="createTime" label="创建日期">
-            <template slot-scope="scope">
-              <span>{{ parseTime(scope.row.createTime) }}</span>
-            </template>
-        </el-table-column>
       </el-col>
     </el-row>
   </div>
@@ -75,7 +71,7 @@ import api from "@/api";
 import DateRangePicker from "@/components/DateRangePicker";
 import rrOperation from "@/components/Crud/RR.operation";
 import crudOperation from "@/components/Crud/CRUD.operation";
-import CRUD, { crud, presenter } from "@/components/Crud/crud";
+import CRUD, { crud, presenter, header } from "@/components/Crud/crud";
 export default {
   data() {
     return {
@@ -92,7 +88,7 @@ export default {
     rrOperation,
     crudOperation,
   },
-  mixins: [presenter(), crud()],
+  mixins: [presenter(), crud(), header()],
   methods: {
     // 获取左侧部门数据
     getDeptDatas(node, resolve) {

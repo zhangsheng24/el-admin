@@ -1,4 +1,5 @@
 import axios from 'axios'
+import qs from 'qs'
 //在main.js中引入了vant，所以在任何组件中都可以使用，但是网络请求跟main.js没得任何关系，要用就得引入，可以按需引入
 import cfg from '@/config'
 import { CgetItem, CsetItem } from '@/utils/storage'
@@ -91,9 +92,16 @@ export default function (options) {
         data: options.params,
         ...options.other
     }
-    if (params.method.toLowerCase() === 'get') {
-        params.params = params.data,
+    // 处理params参数对象里面有数组的情况
+    if (params.method.toLowerCase() === 'get' && params.data !== undefined) {
+        //indices不能少，去除默认处理的方式
+        //https://www.jianshu.com/p/7e64878fb210
+        params.url=params.url+'?'+qs.stringify(params.data,{ indices: false })
             delete params.data
     }
+    // if (params.method.toLowerCase() === 'get') {
+    //     params.params = params.data,
+    //         delete params.data
+    // }
     return axios(params)
 }
